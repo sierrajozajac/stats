@@ -1,0 +1,134 @@
+---
+title: "Lab 2"
+author: "Sierra Jo Sallee"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 5
+    number_sections: no
+    toc: yes
+    toc_float: yes
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+# Task 1
+Get working directory.
+<br>
+```{r}
+getwd()
+```
+# Task 2
+Read data into R.
+<br>
+```{r}
+dataTable = read.csv("/Users/sierrasallee/Desktop/Stats/Labs/DATAxls/EPAGAS.csv")
+
+head(dataTable)
+```
+# Task 3
+Create the variable mpg
+<br>
+```{r}
+mpg = dataTable$MPG
+
+zi = function(x){ # x is a vector
+  n <- length(x)
+  x_mean <- mean(x)
+  (x - x_mean) / sd(x)
+}
+```
+<br>
+Z-transformation of mpg
+<br>
+```{r}
+z = zi(mpg)
+z
+```
+<br>
+Mean value of z
+<br>
+```{r}
+z_mean = round(mean(zi(mpg)), digits=2)
+z_mean
+```
+<br>
+Standard deviation of z squared
+<br>
+```{r}
+sz2 = sd(zi(mpg))^2
+sz2
+```
+<br>
+Possible outliers
+<br>
+```{r}
+possible_outliers = mpg[abs(z)>=2&abs(z)<=3]
+possible_outliers[!is.na(possible_outliers)]
+```
+<br>
+Outliers
+<br>
+```{r}
+outliers = mpg[abs(z)>3]
+outliers[!is.na(outliers)]
+```
+<br>
+Dotplot of possible outliers, outliers, and main line values.
+<br>
+```{r}
+z_value = abs(round(z, digits=0))
+
+dotplot_data = data.frame(dataTable, z_value)
+ggplot(dotplot_data, aes(x=" ", y=MPG, fill=factor(z_value))) + 
+  geom_dotplot(binaxis='y', stackdir='center') +
+  ggtitle("Sierra Jo Sallee") 
+```
+
+# Task 4
+Make a boxplot of the mpg variable
+<br>
+```{r}
+dataTable = read.csv("/Users/sierrasallee/Desktop/Stats/Labs/DATAxls/EPAGAS.csv")
+
+ggplot(dataTable, aes(x=" ", y=MPG)) + 
+  geom_boxplot(notch=TRUE, fill="black") +
+  coord_flip() +
+  ggtitle("Sierra Jo Sallee")
+```
+<br>
+Using Chebyshev’s theorem predict the proportion of data within 2 standard deviations of the mean of the mpg data.
+<br>
+```{r}
+length(mpg) * .75
+```
+<br>
+Use R to calculate the exact proportion within 2 standard deviation of the mean.
+<br>
+```{r}
+c_high = mean(mpg) + (2 * sd(mpg))
+c_low = mean(mpg) - (2 * sd(mpg))
+
+length(with(dataTable, dataTable[MPG <= c_high & MPG >= c_low,]))
+
+```
+<br>
+Does Chebyshev agree with the data? <br>
+Yes. Chebyshev's rule dictates that AT LEAST 75% of the data will be within 2 standard deviations of the mean. Our data has more than 75%, but it still follows Chebyshev's prediction. <br>
+<br>
+Now use the empirical rule, what proportion (according to the rule) of the data should be within 2 standard deviations of the mean?
+<br>
+```{r}
+length(mpg) * .95
+```
+<br>
+How well does it correspond?
+Ther is only 1% of difference in the data from the prediction. It corresponds well.
+<br>
+Is the Empirical rule valid in this case? Why?
+Yes. The Empirical rule states that APPROXIMATELY 95% of the data will be within 2 standard deviations of the mean. 96% is approximately 95%.
